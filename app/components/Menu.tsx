@@ -228,8 +228,9 @@ const Menu = () => {
             </svg>
           </button>
 
+          {/* Navigační šipka doleva - skrytá na mobilu */}
           <button 
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-orange transition"
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-orange transition hidden md:block"
             onClick={() => setGalleryIndex((prev) => (prev - 1 + menuImages.length) % menuImages.length)}
           >
             <Image
@@ -241,7 +242,7 @@ const Menu = () => {
             />
           </button>
 
-          <div className="relative max-h-[90vh] max-w-[90vw]">
+          <div className="relative max-h-[90vh] max-w-[90vw] flex flex-col items-center">
             <Image
               src={getValidImageUrl(menuImages[galleryIndex])}
               alt={`Menu strana ${galleryIndex + 1}`}
@@ -252,10 +253,39 @@ const Menu = () => {
               crossOrigin="anonymous"
               unoptimized={menuImages[galleryIndex].startsWith('http')} // Pro externí obrázky vypneme optimalizaci Next.js
             />
+            
+            {/* Mobilní navigační šipky přímo pod fotkou */}
+            <div className="mt-4 flex justify-center items-center space-x-8 md:hidden">
+              <button 
+                className="text-white hover:text-orange transition"
+                onClick={() => setGalleryIndex((prev) => (prev - 1 + menuImages.length) % menuImages.length)}
+              >
+                <Image
+                  src="/arrow.svg"
+                  alt="Předchozí"
+                  width={40}
+                  height={40}
+                  className="rotate-90"
+                />
+              </button>
+              <button 
+                className="text-white hover:text-orange transition"
+                onClick={() => setGalleryIndex((prev) => (prev + 1) % menuImages.length)}
+              >
+                <Image
+                  src="/arrow.svg"
+                  alt="Další"
+                  width={40}
+                  height={40}
+                  className="-rotate-90"
+                />
+              </button>
+            </div>
           </div>
 
+          {/* Navigační šipka doprava - skrytá na mobilu */}
           <button 
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-orange transition"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-orange transition hidden md:block"
             onClick={() => setGalleryIndex((prev) => (prev + 1) % menuImages.length)}
           >
             <Image
