@@ -16,15 +16,49 @@ export default function AdminPage() {
   const [message, setMessage] = useState('');
   const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Pomocná funkce na ošetření případných chyb v URL
+  const getValidImageUrl = (url: string | null) => {
+    if (!url) return '';
+    // Pokud URL začíná na http/https, je to pravděpodobně Cloudinary URL - použijeme ho přímo
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // Jinak je to pravděpodobně lokální cesta, musíme zajistit, že začíná /
+    return url.startsWith('/') ? url : `/${url}`;
+  };
 
   const fetchCurrentImage = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch('/api/menu-images');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      const adminImage = data.images.find((img: string) => img.includes('admin-menu'));
+      
+      if (!data.images || !Array.isArray(data.images)) {
+        console.warn('Neplatný formát dat z API:', data);
+        setCurrentImage(null);
+        return;
+      }
+      
+      // Hledáme admin-menu obrázek (buď cloudinary URL nebo lokální cestu)
+      const adminImage = data.images.find((img: string) => 
+        img.includes('admin-menu') || 
+        img.includes('/menu/admin-menu')
+      );
+      
+      console.log('Nalezený admin obrázek:', adminImage);
       setCurrentImage(adminImage || null);
     } catch (error) {
       console.error('Chyba při načítání obrázku:', error);
+      setCurrentImage(null);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -65,10 +99,14 @@ export default function AdminPage() {
 
       if (!response.ok) throw new Error('Nahrávání selhalo');
 
+      const data = await response.json();
+      console.log('Upload response:', data);
+
       setMessage('Obrázek byl úspěšně nahrán!');
       setFile(null);
       fetchCurrentImage();
     } catch (error) {
+      console.error('Chyba při nahrávání:', error);
       setMessage('Chyba při nahrávání obrázku.');
     } finally {
       setIsUploading(false);
@@ -82,11 +120,21 @@ export default function AdminPage() {
     setMessage('');
     
     try {
-      const filename = currentImage.split('/').pop();
+      // Extrahujeme název souboru z URL
+      let filename;
+      if (currentImage.includes('cloudinary.com')) {
+        // Pro Cloudinary URL extrahujeme pouze část názvu
+        filename = 'admin-menu';
+      } else {
+        filename = currentImage.split('/').pop();
+      }
+      
       if (!filename) {
         throw new Error('Neplatný název souboru');
       }
 
+      console.log('Mažu soubor:', filename);
+      
       const response = await fetch('/api/delete-image', {
         method: 'POST',
         headers: {
@@ -96,6 +144,7 @@ export default function AdminPage() {
       });
 
       const data = await response.json();
+      console.log('Odpověď po smazání:', data);
 
       if (!response.ok) {
         throw new Error(data.error || 'Mazání selhalo');
@@ -133,15 +182,19 @@ export default function AdminPage() {
         </div>
 
         <div className="bg-black/30 border border-orange/20 rounded-lg p-8">
-          {currentImage ? (
+          {isLoading ? (
+            <div className="text-center text-orange py-8">Načítání...</div>
+          ) : currentImage ? (
             <div className="space-y-6">
               <h2 className="text-orange text-2xl mb-4">Aktuální denní menu:</h2>
               <div className="relative aspect-[3/4] max-w-md mx-auto mb-6">
                 <Image
-                  src={currentImage}
+                  src={getValidImageUrl(currentImage)}
                   alt="Aktuální denní menu"
                   fill
                   className="object-contain rounded-lg border border-orange/40"
+                  crossOrigin="anonymous"
+                  unoptimized={currentImage.startsWith('http')}
                 />
               </div>
               <button
