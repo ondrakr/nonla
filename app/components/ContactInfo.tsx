@@ -70,7 +70,7 @@ const ContactInfo = () => {
           <div className="text-white mb-6 md:mb-10">
             <p className="text-xl md:text-2xl font-medium">{t('openingHours.openUntil')} {getCurrentDayClosingTime()}</p>
           </div>
-          <div className="space-y-1 max-w-sm mx-auto md:mx-0">
+          <div className="space-y-1 mx-auto md:mx-0">
             {openingHours.map((item, index) => (
               <div key={index} className="flex justify-between gap-4 md:gap-8 text-lg md:text-2xl">
                 <span>{item.day}</span>
@@ -80,6 +80,19 @@ const ContactInfo = () => {
           </div>
         </div>
       </div>
+
+      <div className="w-[min(1400px,100%)] mx-auto mt-24 px-4 md:px-12">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2559.921546258238!2d16.461705377109286!3d50.0877557134117!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x470de36e2615063b%3A0xa964c33c6553e8ad!2zTsOzbiBMw6EgUmVzdGF1cmFjZQ!5e0!3m2!1scs!2scz!4v1745671692209!5m2!1scs!2scz" 
+                width="100%" 
+                height="300" 
+                style={{border: 0}} 
+                allowFullScreen 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade" 
+                className="w-full rounded-md"
+              />
+            </div>
     </div>
   );
 };
