@@ -49,6 +49,13 @@ const Menu = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Přidám useEffect pro logování aktuálního stavu menu obrázků po jejich načtení
+  useEffect(() => {
+    if (menuImages.length > 0) {
+      console.log('Aktuální menu obrázky:', menuImages);
+    }
+  }, [menuImages]);
+
   useEffect(() => {
     const updateMaxSlide = () => {
       if (!sliderRef.current || menuImages.length === 0) return;
@@ -138,6 +145,9 @@ const Menu = () => {
     return url.startsWith('/') ? url : `/${url}`;
   };
 
+  // Odstraňuji duplicity přímo v komponentě
+  const uniqueMenuImages = [...new Set(menuImages)].map(url => url);
+
   return (
     <>
       <section className="bg-black py-20">
@@ -168,9 +178,9 @@ const Menu = () => {
               className="flex gap-4 transition-transform duration-500 ease-in-out"
               style={{ transform: `translateX(-${currentSlide * (itemWidth + 16)}px)` }}
             >
-              {menuImages.map((image, index) => (
+              {uniqueMenuImages.map((image, index) => (
                 <div 
-                  key={index} 
+                  key={`${image}-${index}`} 
                   className="flex-shrink-0 cursor-pointer h-[450px] md:h-[613px]"
                   style={{ width: `${itemWidth}px` }}
                   onClick={() => openGallery(index)}
@@ -231,7 +241,7 @@ const Menu = () => {
           {/* Navigační šipka doleva - skrytá na mobilu */}
           <button 
             className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-orange transition hidden md:block"
-            onClick={() => setGalleryIndex((prev) => (prev - 1 + menuImages.length) % menuImages.length)}
+            onClick={() => setGalleryIndex((prev) => (prev - 1 + uniqueMenuImages.length) % uniqueMenuImages.length)}
           >
             <Image
               src="/arrow.svg"
@@ -244,21 +254,21 @@ const Menu = () => {
 
           <div className="relative max-h-[90vh] max-w-[90vw] flex flex-col items-center">
             <Image
-              src={getValidImageUrl(menuImages[galleryIndex])}
+              src={getValidImageUrl(uniqueMenuImages[galleryIndex])}
               alt={`Menu strana ${galleryIndex + 1}`}
               width={1000}
               height={1414}
               className="object-contain max-h-[90vh]"
               priority
               crossOrigin="anonymous"
-              unoptimized={menuImages[galleryIndex].startsWith('http')} // Pro externí obrázky vypneme optimalizaci Next.js
+              unoptimized={uniqueMenuImages[galleryIndex].startsWith('http')} // Pro externí obrázky vypneme optimalizaci Next.js
             />
             
             {/* Mobilní navigační šipky přímo pod fotkou */}
             <div className="mt-4 flex justify-center items-center space-x-8 md:hidden">
               <button 
                 className="text-white hover:text-orange transition"
-                onClick={() => setGalleryIndex((prev) => (prev - 1 + menuImages.length) % menuImages.length)}
+                onClick={() => setGalleryIndex((prev) => (prev - 1 + uniqueMenuImages.length) % uniqueMenuImages.length)}
               >
                 <Image
                   src="/arrow.svg"
@@ -270,7 +280,7 @@ const Menu = () => {
               </button>
               <button 
                 className="text-white hover:text-orange transition"
-                onClick={() => setGalleryIndex((prev) => (prev + 1) % menuImages.length)}
+                onClick={() => setGalleryIndex((prev) => (prev + 1) % uniqueMenuImages.length)}
               >
                 <Image
                   src="/arrow.svg"
@@ -286,7 +296,7 @@ const Menu = () => {
           {/* Navigační šipka doprava - skrytá na mobilu */}
           <button 
             className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-orange transition hidden md:block"
-            onClick={() => setGalleryIndex((prev) => (prev + 1) % menuImages.length)}
+            onClick={() => setGalleryIndex((prev) => (prev + 1) % uniqueMenuImages.length)}
           >
             <Image
               src="/arrow.svg"

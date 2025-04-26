@@ -177,7 +177,12 @@ export async function GET() {
     console.log('Deduplikované obrázky (názvy):', Array.from(addedImageNames));
     console.log('Vracím obrázky bez duplicit:', allImages);
 
-    return NextResponse.json({ images: allImages });
+    // Dodatečná kontrola duplicit přímo podle URL
+    const uniqueImages = [...new Set(allImages)];
+    console.log('Počet obrázků před odstraněním duplicit podle URL:', allImages.length);
+    console.log('Počet obrázků po odstranění duplicit podle URL:', uniqueImages.length);
+
+    return NextResponse.json({ images: uniqueImages });
   } catch (error) {
     console.error('Chyba při načítání obrázků:', error);
     return NextResponse.json({ images: [] });
