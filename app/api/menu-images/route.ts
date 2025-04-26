@@ -57,17 +57,37 @@ export async function GET() {
     let adminImage: CloudinaryResource | undefined;
     
     try {
+      // Zkusíme najít všechny obrázky ve složce menu v Cloudinary
       const { resources } = await cloudinary.search
         .expression('folder:menu')
         .sort_by('public_id', 'asc')
         .max_results(100)
         .execute() as { resources: CloudinaryResource[] };
       
+      console.log('Cloudinary resources:', JSON.stringify(resources, null, 2));
+      
       if (resources && resources.length > 0) {
-        // Najdeme admin-menu obrázek
+        // Najdeme admin-menu obrázek - pozor na správný public_id
         adminImage = resources.find((resource: CloudinaryResource) => 
-          resource.public_id.includes('admin-menu')
+          resource.public_id.endsWith('admin-menu')
         );
+        
+        if (adminImage) {
+          console.log('Found admin image:', adminImage.public_id, adminImage.secure_url);
+        } else {
+          console.log('Admin image not found in resources');
+          
+          // Zkusíme najít admin-menu specificky, pokud nebyl nalezen výše
+          try {
+            const adminResult = await cloudinary.api.resource('menu/admin-menu');
+            if (adminResult) {
+              console.log('Found admin image by direct lookup:', adminResult.public_id);
+              adminImage = adminResult as CloudinaryResource;
+            }
+          } catch (err) {
+            console.error('Error getting admin image by direct lookup:', err);
+          }
+        }
         
         // Filtrujeme ostatní menu obrázky
         const menuCloudinaryImages = resources
@@ -97,6 +117,9 @@ export async function GET() {
       ...localImages,
       ...cloudinaryImages
     ];
+
+    // Log pro debug
+    console.log('Vracím obrázky:', allImages);
 
     return NextResponse.json({ images: allImages });
   } catch (error) {

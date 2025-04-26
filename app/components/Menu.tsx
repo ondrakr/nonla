@@ -28,6 +28,7 @@ const Menu = () => {
       const data = await response.json();
       
       if (data.images && Array.isArray(data.images)) {
+        console.log('Získány obrázky:', data.images);
         setMenuImages(data.images);
       } else {
         console.warn('Neplatný formát dat z API:', data);
@@ -123,6 +124,16 @@ const Menu = () => {
     );
   }
 
+  // Pomocná funkce na ošetření případných chyb v URL
+  const getValidImageUrl = (url: string) => {
+    // Pokud URL začíná na http/https, je to pravděpodobně Cloudinary URL - použijeme ho přímo
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // Jinak je to pravděpodobně lokální cesta, musíme zajistit, že začíná /
+    return url.startsWith('/') ? url : `/${url}`;
+  };
+
   return (
     <>
       <section className="bg-black py-20">
@@ -161,12 +172,14 @@ const Menu = () => {
                   onClick={() => openGallery(index)}
                 >
                   <Image
-                    src={image}
+                    src={getValidImageUrl(image)}
                     alt={`Menu strana ${index + 1}`}
                     width={433}
                     height={613}
                     className="object-cover w-full h-full rounded-[5px] border border-orange hover:opacity-90 transition"
                     priority={index === 0}
+                    crossOrigin="anonymous"
+                    unoptimized={image.startsWith('http')} // Pro externí obrázky vypneme optimalizaci Next.js
                   />
                 </div>
               ))}
@@ -226,12 +239,14 @@ const Menu = () => {
 
           <div className="relative max-h-[90vh] max-w-[90vw]">
             <Image
-              src={menuImages[galleryIndex]}
+              src={getValidImageUrl(menuImages[galleryIndex])}
               alt={`Menu strana ${galleryIndex + 1}`}
               width={1000}
               height={1414}
               className="object-contain max-h-[90vh]"
               priority
+              crossOrigin="anonymous"
+              unoptimized={menuImages[galleryIndex].startsWith('http')} // Pro externí obrázky vypneme optimalizaci Next.js
             />
           </div>
 
