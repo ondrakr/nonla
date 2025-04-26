@@ -2,7 +2,9 @@
   "phone": "+420 725 090 800",
   "location": "ŽAMBERK",
   "menu": {
-    "title": "MENU"
+    "title": "NABÍDKA",
+    "loading": "Načítání...",
+    "notAvailable": "Menu není v tuto chvíli k dispozici."
   },
   "openingHours": {
     "title": "OTEVÍRACÍ DOBA",

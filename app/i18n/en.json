@@ -2,7 +2,9 @@
   "phone": "+420 725 090 800",
   "location": "ZAMBERK",
   "menu": {
-    "title": "MENU"
+    "title": "MENU",
+    "loading": "Loading...",
+    "notAvailable": "Menu not available at the moment."
   },
   "openingHours": {
     "title": "OPENING HOURS",

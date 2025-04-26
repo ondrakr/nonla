@@ -2,7 +2,9 @@
   "phone": "+420 725 090 800",
   "location": "ZAMBERK",
   "menu": {
-    "title": "SPEISEKARTE"
+    "title": "SPEISEKARTE",
+    "loading": "Wird geladen...",
+    "notAvailable": "Speisekarte ist momentan nicht verfügbar."
   },
   "openingHours": {
     "title": "ÖFFNUNGSZEITEN",

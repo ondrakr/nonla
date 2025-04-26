@@ -14,6 +14,7 @@ const Menu = () => {
   const [menuImages, setMenuImages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [itemWidth, setItemWidth] = useState(433);
 
   const fetchMenuImages = async () => {
     try {
@@ -52,8 +53,11 @@ const Menu = () => {
     const updateMaxSlide = () => {
       if (!sliderRef.current || menuImages.length === 0) return;
       const containerWidth = sliderRef.current.offsetWidth;
-      const totalWidth = 433 * menuImages.length + 16 * (menuImages.length - 1);
-      const maxPossibleSlide = Math.max(0, menuImages.length - Math.floor(containerWidth / (433 + 16)));
+      const isMobile = window.innerWidth < 768;
+      const newItemWidth = isMobile ? 320 : 433;
+      setItemWidth(newItemWidth);
+      const totalWidth = newItemWidth * menuImages.length + 16 * (menuImages.length - 1);
+      const maxPossibleSlide = Math.max(0, menuImages.length - Math.floor(containerWidth / (newItemWidth + 16)));
       setMaxSlide(maxPossibleSlide);
       setCurrentSlide(prev => Math.min(prev, maxPossibleSlide));
     };
@@ -137,7 +141,7 @@ const Menu = () => {
   return (
     <>
       <section className="bg-black py-20">
-        <h1 className="text-center text-orange text-5xl font-medium mb-16">{t('menu.title')}</h1>
+        <h1 className="text-center text-orange text-5xl font-medium mb-10">{t('menu.title')}</h1>
         
         <div className="relative w-[min(1400px,100%)] mx-auto px-12">
           {canSlideLeft && (
@@ -157,18 +161,18 @@ const Menu = () => {
 
           <div ref={sliderRef} className="overflow-hidden relative">
             {canSlideLeft && (
-              <div className="absolute left-0 top-0 w-24 h-full z-10" style={{ background: 'linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.00) 100%)' }}></div>
+              <div className="absolute left-0 top-0 w-12 md:w-24 h-full z-10" style={{ background: 'linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.00) 100%)' }}></div>
             )}
             
             <div 
               className="flex gap-4 transition-transform duration-500 ease-in-out"
-              style={{ transform: `translateX(-${currentSlide * (433 + 16)}px)` }}
+              style={{ transform: `translateX(-${currentSlide * (itemWidth + 16)}px)` }}
             >
               {menuImages.map((image, index) => (
                 <div 
                   key={index} 
-                  className="flex-shrink-0 cursor-pointer h-[613px]"
-                  style={{ width: '433px' }}
+                  className="flex-shrink-0 cursor-pointer h-[450px] md:h-[613px]"
+                  style={{ width: `${itemWidth}px` }}
                   onClick={() => openGallery(index)}
                 >
                   <Image
@@ -186,7 +190,7 @@ const Menu = () => {
             </div>
 
             {canSlideRight && (
-              <div className="absolute right-0 top-0 w-24 h-full z-10" style={{ background: 'linear-gradient(270deg, #000 0%, rgba(0, 0, 0, 0.00) 100%)' }}></div>
+              <div className="absolute right-0 top-0 w-12 md:w-24 h-full z-10" style={{ background: 'linear-gradient(270deg, #000 0%, rgba(0, 0, 0, 0.00) 100%)' }}></div>
             )}
           </div>
 

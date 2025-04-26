@@ -161,33 +161,33 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black py-20">
-      <div className="max-w-[min(1400px,100%)] mx-auto px-12">
-        <div className="flex justify-between items-center mb-12">
-          <h1 className="text-orange text-5xl font-medium">Správa denního menu</h1>
-          <div className="flex gap-4">
+    <div className="min-h-screen bg-black py-8 sm:py-16 px-4 sm:px-6">
+      <div className="max-w-[min(1400px,100%)] mx-auto">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8 sm:mb-12">
+          <h1 className="text-orange text-3xl sm:text-4xl md:text-5xl font-medium">Správa denního menu</h1>
+          <div className="flex flex-wrap gap-3">
             <Link
               href={`/${locale}`}
-              className="px-6 py-3 border border-orange rounded-md text-orange hover:bg-orange hover:text-black transition-colors"
+              className="px-4 sm:px-6 py-2 sm:py-3 border border-orange rounded-md text-orange text-sm sm:text-base hover:bg-orange hover:text-black transition-colors flex items-center justify-center"
             >
               Zpět na web
             </Link>
             <button
               onClick={handleLogout}
-              className="px-6 py-3 border border-orange rounded-md text-orange hover:bg-orange hover:text-black transition-colors"
+              className="px-4 sm:px-6 py-2 sm:py-3 border border-orange rounded-md text-orange text-sm sm:text-base hover:bg-orange hover:text-black transition-colors flex items-center justify-center"
             >
               Odhlásit se
             </button>
           </div>
         </div>
 
-        <div className="bg-black/30 border border-orange/20 rounded-lg p-8">
+        <div className="bg-black/30 border border-orange/20 rounded-lg p-4 sm:p-6 md:p-8">
           {isLoading ? (
             <div className="text-center text-orange py-8">Načítání...</div>
           ) : currentImage ? (
-            <div className="space-y-6">
-              <h2 className="text-orange text-2xl mb-4">Aktuální denní menu:</h2>
-              <div className="relative aspect-[3/4] max-w-md mx-auto mb-6">
+            <div className="space-y-4 sm:space-y-6">
+              <h2 className="text-orange text-xl sm:text-2xl mb-2 sm:mb-4">Aktuální denní menu:</h2>
+              <div className="relative w-full max-w-sm mx-auto aspect-[3/4] mb-4 sm:mb-6">
                 <Image
                   src={getValidImageUrl(currentImage)}
                   alt="Aktuální denní menu"
@@ -200,33 +200,34 @@ export default function AdminPage() {
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="w-full max-w-md mx-auto flex justify-center py-3 px-4 border border-red-500 rounded-md text-red-500 hover:bg-red-500 hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full max-w-sm mx-auto flex justify-center py-2 sm:py-3 px-4 border border-red-500 rounded-md text-red-500 text-sm sm:text-base hover:bg-red-500 hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isDeleting ? 'Mazání...' : 'Smazat denní menu'}
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto">
-              <div className="border-2 border-dashed border-orange/40 p-8 rounded-lg text-center">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 max-w-sm mx-auto">
+              <div className="border-2 border-dashed border-orange/40 p-4 sm:p-8 rounded-lg text-center">
                 <input
                   type="file"
                   accept="image/*"
+                  capture="environment"
                   onChange={(e) => setFile(e.target.files?.[0] || null)}
                   className="hidden"
                   id="fileInput"
                 />
                 <label
                   htmlFor="fileInput"
-                  className="cursor-pointer text-orange hover:text-orange/80 block"
+                  className="cursor-pointer text-orange hover:text-orange/80 block p-2 text-sm sm:text-base"
                 >
-                  {file ? file.name : 'Vyberte obrázek denního menu'}
+                  {file ? file.name : 'Vyberte nebo vyfoťte obrázek menu'}
                 </label>
               </div>
 
               <button
                 type="submit"
                 disabled={!file || isUploading}
-                className="w-full flex justify-center py-3 px-4 border border-orange rounded-md text-lg font-medium text-black bg-orange hover:bg-orange/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex justify-center py-2 sm:py-3 px-4 border border-orange rounded-md text-base sm:text-lg font-medium text-black bg-orange hover:bg-orange/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isUploading ? 'Nahrávání...' : 'Nahrát denní menu'}
               </button>
@@ -234,7 +235,7 @@ export default function AdminPage() {
           )}
 
           {message && (
-            <div className={`mt-6 p-4 rounded-lg text-center ${
+            <div className={`mt-4 sm:mt-6 p-3 sm:p-4 rounded-lg text-center text-sm sm:text-base ${
               message.includes('úspěšně') 
                 ? 'bg-green-900/50 border border-green-500 text-green-200'
                 : 'bg-red-900/50 border border-red-500 text-red-200'
