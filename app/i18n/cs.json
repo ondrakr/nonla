@@ -1,0 +1,28 @@
+{
+  "phone": "+420 725 090 800",
+  "location": "ŽAMBERK",
+  "menu": {
+    "title": "MENU"
+  },
+  "openingHours": {
+    "title": "OTEVÍRACÍ DOBA",
+    "openUntil": "DNES OTEVŘENO DO",
+    "days": {
+      "MONDAY": "PONDĚLÍ",
+      "TUESDAY": "ÚTERÝ",
+      "WEDNESDAY": "STŘEDA",
+      "THURSDAY": "ČTVRTEK",
+      "FRIDAY": "PÁTEK",
+      "SATURDAY": "SOBOTA",
+      "SUNDAY": "NEDĚLE"
+    }
+  },
+  "contact": {
+    "callUs": "ZAVOLEJTE NÁM",
+    "findUs": "NAJDETE NÁS ZDE",
+    "address": {
+      "street": "Masarykovo nám. 144",
+      "city": "Žamberk 564 01"
+    }
+  }
+} 

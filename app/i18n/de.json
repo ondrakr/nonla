@@ -1,0 +1,28 @@
+{
+  "phone": "+420 725 090 800",
+  "location": "ZAMBERK",
+  "menu": {
+    "title": "SPEISEKARTE"
+  },
+  "openingHours": {
+    "title": "ÖFFNUNGSZEITEN",
+    "openUntil": "HEUTE GEÖFFNET BIS",
+    "days": {
+      "MONDAY": "MONTAG",
+      "TUESDAY": "DIENSTAG",
+      "WEDNESDAY": "MITTWOCH",
+      "THURSDAY": "DONNERSTAG",
+      "FRIDAY": "FREITAG",
+      "SATURDAY": "SAMSTAG",
+      "SUNDAY": "SONNTAG"
+    }
+  },
+  "contact": {
+    "callUs": "RUFEN SIE UNS AN",
+    "findUs": "HIER FINDEN SIE UNS",
+    "address": {
+      "street": "Masarykovo nam. 144",
+      "city": "Zamberk 564 01"
+    }
+  }
+} 

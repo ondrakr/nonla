@@ -1,0 +1,28 @@
+{
+  "phone": "+420 725 090 800",
+  "location": "ZAMBERK",
+  "menu": {
+    "title": "MENU"
+  },
+  "openingHours": {
+    "title": "OPENING HOURS",
+    "openUntil": "TODAY OPEN UNTIL",
+    "days": {
+      "MONDAY": "MONDAY",
+      "TUESDAY": "TUESDAY",
+      "WEDNESDAY": "WEDNESDAY",
+      "THURSDAY": "THURSDAY",
+      "FRIDAY": "FRIDAY",
+      "SATURDAY": "SATURDAY",
+      "SUNDAY": "SUNDAY"
+    }
+  },
+  "contact": {
+    "callUs": "CALL US",
+    "findUs": "FIND US HERE",
+    "address": {
+      "street": "Masarykovo nam. 144",
+      "city": "Zamberk 564 01"
+    }
+  }
+} 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="100" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .text { fill: #ffffff; font-family: Arial, sans-serif; }
+    .accent { fill: #FCD34D; }
+  </style>
+  <path class="accent" d="M40,50 C40,30 60,20 80,30 C100,40 120,30 120,50 C120,70 100,80 80,70 C60,60 40,70 40,50 Z"/>
+  <text x="50" y="55" class="text" font-size="24">NÓN LÁ</text>
+</svg> 
