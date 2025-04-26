@@ -111,15 +111,42 @@ export async function GET() {
     // 2. Získáme lokální obrázky menu
     const localImages = await getLocalMenuImages();
     
-    // 3. Spojíme všechny obrázky (nejprve admin obrázek, pak lokální a pak cloudinary)
-    const allImages = [
-      ...(adminImage ? [adminImage.secure_url] : []),
-      ...localImages,
-      ...cloudinaryImages
-    ];
+    // 3. Spojíme všechny obrázky a odstraníme duplicity
+    // Priorita: nejprve admin obrázek, pak lokální a pak cloudinary
+    let allImages = [];
+    
+    // Nejprve přidáme admin obrázek, pokud existuje
+    if (adminImage) {
+      allImages.push(adminImage.secure_url);
+    }
+    
+    // Přidáme lokální obrázky
+    allImages = [...allImages, ...localImages];
+    
+    // Přidáme cloudinary obrázky, ale pouze ty, které nemají stejný název souboru jako již přidané obrázky
+    const existingFileNames = new Set(
+      allImages.map(url => {
+        // Extrahujeme název souboru z URL
+        const parts = url.split('/');
+        return parts[parts.length - 1].split('.')[0]; // Získáme název bez přípony
+      })
+    );
+    
+    // Přidáme pouze ty cloudinary obrázky, které ještě nemáme
+    for (const cloudinaryUrl of cloudinaryImages) {
+      const parts = cloudinaryUrl.split('/');
+      const fileNameWithExt = parts[parts.length - 1];
+      const fileName = fileNameWithExt.split('.')[0];
+      
+      // Pokud tento soubor ještě nemáme, přidáme ho
+      if (!existingFileNames.has(fileName)) {
+        allImages.push(cloudinaryUrl);
+        existingFileNames.add(fileName);
+      }
+    }
 
     // Log pro debug
-    console.log('Vracím obrázky:', allImages);
+    console.log('Vracím obrázky bez duplicit:', allImages);
 
     return NextResponse.json({ images: allImages });
   } catch (error) {
