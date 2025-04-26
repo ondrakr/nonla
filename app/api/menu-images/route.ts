@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import cloudinary from '@/app/lib/cloudinary';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 // Definice typů pro resource z Cloudinary
 interface CloudinaryResource {
@@ -10,44 +12,95 @@ interface CloudinaryResource {
   [key: string]: any;
 }
 
-export async function GET() {
+// Funkce pro získání lokálních obrázků z public/menu
+async function getLocalMenuImages(): Promise<string[]> {
   try {
-    // Hledáme obrázky v adresáři 'menu' v Cloudinary
-    const { resources } = await cloudinary.search
-      .expression('folder:menu')
-      .sort_by('public_id', 'asc')
-      .max_results(100)
-      .execute() as { resources: CloudinaryResource[] };
+    const menuDir = path.join(process.cwd(), 'public', 'menu');
     
-    if (!resources || resources.length === 0) {
-      return NextResponse.json({ images: [] });
+    // Zkontrolujeme, zda složka existuje
+    try {
+      await fs.access(menuDir);
+    } catch (error) {
+      console.log(`Složka ${menuDir} neexistuje`);
+      return [];
     }
     
-    // Rozdělíme obrázky na admin a ostatní menu obrázky
-    const adminImage = resources.find((resource: CloudinaryResource) => 
-      resource.public_id.includes('admin-menu')
-    );
+    // Načteme soubory
+    const files = await fs.readdir(menuDir);
     
-    const menuImages = resources
-      .filter((resource: CloudinaryResource) => /menu\/menu\d+$/.test(resource.public_id))
-      .sort((a: CloudinaryResource, b: CloudinaryResource) => {
+    if (!files || files.length === 0) {
+      return [];
+    }
+    
+    // Filtrujeme pouze menu obrázky (ne admin-menu)
+    const menuImages = files
+      .filter(file => /^menu\d+\.(jpg|jpeg|png|gif)$/i.test(file))
+      .sort((a, b) => {
         // Seřadíme podle čísla v názvu
-        const aMatch = a.public_id.match(/\d+$/);
-        const bMatch = b.public_id.match(/\d+$/);
-        const aNum = aMatch ? parseInt(aMatch[0]) : 0;
-        const bNum = bMatch ? parseInt(bMatch[0]) : 0;
+        const aNum = parseInt(a.match(/\d+/)?.[0] || '0');
+        const bNum = parseInt(b.match(/\d+/)?.[0] || '0');
         return aNum - bNum;
-      });
+      })
+      .map(file => `/menu/${file}`);
+    
+    return menuImages;
+  } catch (error) {
+    console.error('Chyba při načítání lokálních obrázků:', error);
+    return [];
+  }
+}
 
-    // Spojíme admin obrázek (pokud existuje) s menu obrázky a vracíme jejich URL
+export async function GET() {
+  try {
+    // 1. Získáme obrázky z Cloudinary
+    let cloudinaryImages: string[] = [];
+    let adminImage: CloudinaryResource | undefined;
+    
+    try {
+      const { resources } = await cloudinary.search
+        .expression('folder:menu')
+        .sort_by('public_id', 'asc')
+        .max_results(100)
+        .execute() as { resources: CloudinaryResource[] };
+      
+      if (resources && resources.length > 0) {
+        // Najdeme admin-menu obrázek
+        adminImage = resources.find((resource: CloudinaryResource) => 
+          resource.public_id.includes('admin-menu')
+        );
+        
+        // Filtrujeme ostatní menu obrázky
+        const menuCloudinaryImages = resources
+          .filter((resource: CloudinaryResource) => /menu\/menu\d+$/.test(resource.public_id))
+          .sort((a: CloudinaryResource, b: CloudinaryResource) => {
+            const aMatch = a.public_id.match(/\d+$/);
+            const bMatch = b.public_id.match(/\d+$/);
+            const aNum = aMatch ? parseInt(aMatch[0]) : 0;
+            const bNum = bMatch ? parseInt(bMatch[0]) : 0;
+            return aNum - bNum;
+          })
+          .map((resource: CloudinaryResource) => resource.secure_url);
+        
+        cloudinaryImages = menuCloudinaryImages;
+      }
+    } catch (error) {
+      console.error('Chyba při načítání obrázků z Cloudinary:', error);
+      // Pokračujeme i když Cloudinary selže
+    }
+    
+    // 2. Získáme lokální obrázky menu
+    const localImages = await getLocalMenuImages();
+    
+    // 3. Spojíme všechny obrázky (nejprve admin obrázek, pak lokální a pak cloudinary)
     const allImages = [
       ...(adminImage ? [adminImage.secure_url] : []),
-      ...menuImages.map((resource: CloudinaryResource) => resource.secure_url)
+      ...localImages,
+      ...cloudinaryImages
     ];
 
     return NextResponse.json({ images: allImages });
   } catch (error) {
-    console.error('Chyba při načítání obrázků z Cloudinary:', error);
+    console.error('Chyba při načítání obrázků:', error);
     return NextResponse.json({ images: [] });
   }
 } 

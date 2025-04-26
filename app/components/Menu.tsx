@@ -12,14 +12,32 @@ const Menu = () => {
   const [galleryIndex, setGalleryIndex] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
   const [menuImages, setMenuImages] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchMenuImages = async () => {
     try {
+      setIsLoading(true);
+      setError(null);
       const response = await fetch('/api/menu-images');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      setMenuImages(data.images);
+      
+      if (data.images && Array.isArray(data.images)) {
+        setMenuImages(data.images);
+      } else {
+        console.warn('Neplatný formát dat z API:', data);
+        setMenuImages([]);
+      }
     } catch (error) {
       console.error('Chyba při načítání obrázků:', error);
+      setError('Nepodařilo se načíst menu. Zkuste to prosím později.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -31,7 +49,7 @@ const Menu = () => {
 
   useEffect(() => {
     const updateMaxSlide = () => {
-      if (!sliderRef.current) return;
+      if (!sliderRef.current || menuImages.length === 0) return;
       const containerWidth = sliderRef.current.offsetWidth;
       const totalWidth = 433 * menuImages.length + 16 * (menuImages.length - 1);
       const maxPossibleSlide = Math.max(0, menuImages.length - Math.floor(containerWidth / (433 + 16)));
@@ -76,6 +94,34 @@ const Menu = () => {
 
   const canSlideLeft = currentSlide > 0;
   const canSlideRight = currentSlide < maxSlide;
+
+  // Případné chybové zprávy nebo načítání
+  if (isLoading && menuImages.length === 0) {
+    return (
+      <section className="bg-black py-20">
+        <h1 className="text-center text-orange text-5xl font-medium mb-16">{t('menu.title')}</h1>
+        <div className="text-center text-orange">{t('menu.loading')}</div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="bg-black py-20">
+        <h1 className="text-center text-orange text-5xl font-medium mb-16">{t('menu.title')}</h1>
+        <div className="text-center text-red-500">{error}</div>
+      </section>
+    );
+  }
+
+  if (menuImages.length === 0) {
+    return (
+      <section className="bg-black py-20">
+        <h1 className="text-center text-orange text-5xl font-medium mb-16">{t('menu.title')}</h1>
+        <div className="text-center text-orange">{t('menu.notAvailable')}</div>
+      </section>
+    );
+  }
 
   return (
     <>
