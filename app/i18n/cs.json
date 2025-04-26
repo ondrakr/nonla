@@ -26,5 +26,14 @@
       "street": "Masarykovo nám. 144",
       "city": "Žamberk 564 01"
     }
+  },
+  "cookies": {
+    "title": "SOUHLAS S COOKIES",
+    "description": "Tato stránka používá cookies pro zlepšení vaší uživatelské zkušenosti. Kliknutím na 'Přijmout vše' souhlasíte s použitím cookies. Můžete také zvolit pouze nezbytné cookies.",
+    "necessary": "JEN NEZBYTNÉ",
+    "accept": "PŘIJMOUT VŠE",
+    "mapTitle": "MAPA JE BLOKOVÁNA",
+    "mapDescription": "Mapa Google vyžaduje souhlas s cookies. Pro zobrazení mapy prosím povolte všechny cookies.",
+    "enable": "POVOLIT COOKIES"
   }
 } 

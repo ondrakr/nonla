@@ -26,5 +26,14 @@
       "street": "Masarykovo nam. 144",
       "city": "Zamberk 564 01"
     }
+  },
+  "cookies": {
+    "title": "COOKIE CONSENT",
+    "description": "This website uses cookies to improve your browsing experience. By clicking 'Accept all', you consent to the use of cookies. You can also choose to only use necessary cookies.",
+    "necessary": "NECESSARY ONLY",
+    "accept": "ACCEPT ALL",
+    "mapTitle": "MAP IS BLOCKED",
+    "mapDescription": "Google Maps requires cookie consent. To view the map, please enable all cookies.",
+    "enable": "ENABLE COOKIES"
   }
 } 

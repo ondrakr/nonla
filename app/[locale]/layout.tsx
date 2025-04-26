@@ -6,6 +6,8 @@ import { defaultMetadata } from '../config/metadata';
 import { Montserrat } from 'next/font/google';
 import '../globals.css';
 import { Metadata, Viewport } from 'next';
+import CookieConsent from '../components/CookieConsent';
+import { CookieConsentProvider } from '../context/CookieConsentContext';
 
 const montserrat = Montserrat({ 
   subsets: ['latin', 'latin-ext'],
@@ -77,9 +79,12 @@ export default function RootLayout({
     <html lang={locale} className="scroll-smooth">
       <body className={`${montserrat.variable} antialiased font-montserrat`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <main>
-            {children}
-          </main>
+          <CookieConsentProvider>
+            <main>
+              {children}
+            </main>
+            <CookieConsent />
+          </CookieConsentProvider>
         </NextIntlClientProvider>
       </body>
     </html>
