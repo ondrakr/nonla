@@ -141,7 +141,7 @@ const Menu = () => {
   return (
     <>
       <section className="bg-black py-20">
-        <h1 className="text-center text-orange text-5xl font-medium mb-10">{t('menu.title')}</h1>
+        <h1 className="text-center text-orange text-3xl md:text-5xl font-medium mb-10">{t('menu.title')}</h1>
         
         <div className="relative w-[min(1400px,100%)] mx-auto px-12">
           {canSlideLeft && (
