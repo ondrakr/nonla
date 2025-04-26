@@ -1,23 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, readdir, unlink, mkdir, access } from 'fs/promises';
-import { constants } from 'fs';
-import path from 'path';
-
-// Asynchronně zkontroluje, zda složka existuje
-async function ensureDirExists(dirPath: string): Promise<void> {
-  try {
-    await access(dirPath, constants.R_OK);
-  } catch {
-    // Složka neexistuje, vytvoříme ji
-    try {
-      await mkdir(dirPath, { recursive: true });
-      console.log(`Složka ${dirPath} byla vytvořena`);
-    } catch (err) {
-      console.error(`Chyba při vytváření složky ${dirPath}:`, err);
-      throw err;
-    }
-  }
-}
+import cloudinary from '@/app/lib/cloudinary';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,9 +13,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
     // Zajistíme, že soubor je obrázek
     if (!file.type.startsWith('image/')) {
       return NextResponse.json(
@@ -42,35 +21,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const menuDir = path.join(process.cwd(), 'public', 'menu');
+    // Převést soubor na buffer
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
     
-    // Zajistíme, že složka existuje
-    await ensureDirExists(menuDir);
+    // Převést buffer na base64 pro Cloudinary
+    const base64Data = buffer.toString('base64');
+    const dataURI = `data:${file.type};base64,${base64Data}`;
     
-    // Smažeme existující admin-menu.* soubor, pokud existuje
+    // Zkusit najít a smazat existující obrázek admin-menu v Cloudinary
     try {
-      const files = await readdir(menuDir);
-      for (const existingFile of files) {
-        if (existingFile.startsWith('admin-menu.')) {
-          const fullPath = path.join(menuDir, existingFile);
-          console.log(`Mažu starý soubor: ${fullPath}`);
-          await unlink(fullPath);
-        }
+      const { resources } = await cloudinary.search
+        .expression('public_id:admin-menu')
+        .execute();
+      
+      if (resources && resources.length > 0) {
+        await cloudinary.uploader.destroy('admin-menu');
+        console.log('Existující obrázek admin-menu byl smazán z Cloudinary');
       }
     } catch (error) {
-      console.error('Chyba při mazání starého souboru:', error);
+      console.error('Chyba při hledání/mazání existujícího obrázku:', error);
       // Pokračujeme i pokud se smazání nepodaří
     }
 
-    // Vytvoříme nový soubor se stejnou příponou jako původní soubor
-    const extension = path.extname(file.name);
-    const filename = `admin-menu${extension}`;
-    const filepath = path.join(menuDir, filename);
-    
-    await writeFile(filepath, buffer);
-    console.log(`Soubor úspěšně nahrán: ${filepath}`);
+    // Nahrát nový obrázek do Cloudinary s pevným public_id
+    const result = await cloudinary.uploader.upload(dataURI, {
+      public_id: 'admin-menu',
+      folder: 'menu',
+      overwrite: true
+    });
 
-    return NextResponse.json({ success: true, filename });
+    console.log(`Soubor úspěšně nahrán do Cloudinary: ${result.secure_url}`);
+
+    return NextResponse.json({ 
+      success: true, 
+      filename: result.public_id,
+      url: result.secure_url
+    });
   } catch (error) {
     console.error('Chyba při nahrávání:', error);
     return NextResponse.json(

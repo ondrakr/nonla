@@ -1,56 +1,53 @@
 import { NextResponse } from 'next/server';
-import { readdir, access } from 'fs/promises';
-import { constants } from 'fs';
-import path from 'path';
+import cloudinary from '@/app/lib/cloudinary';
 
-// Asynchronně zkontroluje, zda složka existuje
-async function folderExists(dirPath: string): Promise<boolean> {
-  try {
-    await access(dirPath, constants.R_OK);
-    return true;
-  } catch {
-    return false;
-  }
+// Definice typů pro resource z Cloudinary
+interface CloudinaryResource {
+  public_id: string;
+  secure_url: string;
+  url: string;
+  asset_id: string;
+  [key: string]: any;
 }
 
 export async function GET() {
   try {
-    const menuDir = path.join(process.cwd(), 'public', 'menu');
+    // Hledáme obrázky v adresáři 'menu' v Cloudinary
+    const { resources } = await cloudinary.search
+      .expression('folder:menu')
+      .sort_by('public_id', 'asc')
+      .max_results(100)
+      .execute() as { resources: CloudinaryResource[] };
     
-    // Zkontrolujeme, zda složka existuje
-    const exists = await folderExists(menuDir);
-    if (!exists) {
-      console.log(`Složka ${menuDir} neexistuje`);
+    if (!resources || resources.length === 0) {
       return NextResponse.json({ images: [] });
     }
     
-    // Načteme soubory
-    const files = await readdir(menuDir);
+    // Rozdělíme obrázky na admin a ostatní menu obrázky
+    const adminImage = resources.find((resource: CloudinaryResource) => 
+      resource.public_id.includes('admin-menu')
+    );
     
-    if (!files || files.length === 0) {
-      return NextResponse.json({ images: [] });
-    }
-    
-    // Rozdělíme soubory na admin a ostatní menu obrázky
-    const adminImage = files.find(file => file.startsWith('admin-menu.'));
-    const menuImages = files
-      .filter(file => /^menu\d+\.(jpg|jpeg|png|gif)$/i.test(file))
-      .sort((a, b) => {
+    const menuImages = resources
+      .filter((resource: CloudinaryResource) => /menu\/menu\d+$/.test(resource.public_id))
+      .sort((a: CloudinaryResource, b: CloudinaryResource) => {
         // Seřadíme podle čísla v názvu
-        const aNum = parseInt(a.match(/\d+/)?.[0] || '0');
-        const bNum = parseInt(b.match(/\d+/)?.[0] || '0');
+        const aMatch = a.public_id.match(/\d+$/);
+        const bMatch = b.public_id.match(/\d+$/);
+        const aNum = aMatch ? parseInt(aMatch[0]) : 0;
+        const bNum = bMatch ? parseInt(bMatch[0]) : 0;
         return aNum - bNum;
       });
 
-    // Spojíme admin obrázek (pokud existuje) s menu obrázky
+    // Spojíme admin obrázek (pokud existuje) s menu obrázky a vracíme jejich URL
     const allImages = [
-      ...(adminImage ? [`/menu/${adminImage}`] : []),
-      ...menuImages.map(file => `/menu/${file}`)
+      ...(adminImage ? [adminImage.secure_url] : []),
+      ...menuImages.map((resource: CloudinaryResource) => resource.secure_url)
     ];
 
     return NextResponse.json({ images: allImages });
   } catch (error) {
-    console.error('Chyba při načítání obrázků:', error);
+    console.error('Chyba při načítání obrázků z Cloudinary:', error);
     return NextResponse.json({ images: [] });
   }
 } 

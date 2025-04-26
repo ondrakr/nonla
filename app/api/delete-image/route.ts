@@ -1,20 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { unlink, access } from 'fs/promises';
-import { constants } from 'fs';
-import path from 'path';
-
-// Asynchronně zkontroluje, zda soubor existuje
-async function fileExists(filePath: string): Promise<boolean> {
-  try {
-    await access(filePath, constants.F_OK);
-    return true;
-  } catch {
-    return false;
-  }
-}
+import cloudinary from '@/app/lib/cloudinary';
 
 export async function POST(request: NextRequest) {
   try {
+    // Nemusíme se starat o filename - vždy mažeme obrázek s ID 'admin-menu'
+    // pro zjednodušení, ale pro kompatibilitu s frontendem ponecháme strukturu
     const { filename } = await request.json();
     
     if (!filename) {
@@ -25,29 +15,35 @@ export async function POST(request: NextRequest) {
     }
 
     // Ověříme, že se jedná o admin obrázek
-    if (!filename.startsWith('admin-menu.')) {
+    if (!filename.includes('admin-menu')) {
       return NextResponse.json(
         { error: 'Lze smazat pouze admin obrázek' },
         { status: 400 }
       );
     }
 
-    const filepath = path.join(process.cwd(), 'public', 'menu', filename);
-    
-    // Ověříme, zda soubor existuje
-    const exists = await fileExists(filepath);
-    if (!exists) {
-      console.log(`Soubor ${filepath} neexistuje, nelze smazat`);
-      return NextResponse.json(
-        { error: 'Soubor neexistuje' },
-        { status: 404 }
-      );
+    try {
+      // Pokusíme se najít a smazat obrázek v Cloudinary
+      const { resources } = await cloudinary.search
+        .expression('public_id:menu/admin-menu')
+        .execute();
+      
+      if (resources && resources.length > 0) {
+        // Smažeme obrázek
+        const result = await cloudinary.uploader.destroy('menu/admin-menu');
+        console.log(`Soubor byl úspěšně smazán z Cloudinary, výsledek: ${result}`);
+        return NextResponse.json({ success: true });
+      } else {
+        console.log('Obrázek v Cloudinary nebyl nalezen');
+        return NextResponse.json(
+          { error: 'Soubor neexistuje' },
+          { status: 404 }
+        );
+      }
+    } catch (error) {
+      console.error('Chyba při hledání/mazání obrázku v Cloudinary:', error);
+      throw error;
     }
-    
-    await unlink(filepath);
-    console.log(`Soubor ${filepath} byl úspěšně smazán`);
-
-    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Chyba při mazání:', error);
     return NextResponse.json(
