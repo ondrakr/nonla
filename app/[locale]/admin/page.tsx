@@ -211,7 +211,6 @@ export default function AdminPage() {
                 <input
                   type="file"
                   accept="image/*"
-                  capture="environment"
                   onChange={(e) => setFile(e.target.files?.[0] || null)}
                   className="hidden"
                   id="fileInput"
@@ -220,7 +219,7 @@ export default function AdminPage() {
                   htmlFor="fileInput"
                   className="cursor-pointer text-orange hover:text-orange/80 block p-2 text-sm sm:text-base"
                 >
-                  {file ? file.name : 'Vyberte nebo vyfoťte obrázek menu'}
+                  {file ? file.name : 'Vyberte obrázek menu'}
                 </label>
               </div>
 
