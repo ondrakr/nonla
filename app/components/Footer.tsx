@@ -9,7 +9,7 @@ const Footer = () => {
         <img src="/jidlo4.jpg" alt="Jídlo 4" className="w-1/4 h-48 object-cover" />
       </div>
       <div className="text-center text-black z-20 bg-orange py-2 relative">
-        © {new Date().getFullYear()} Ondřej Krejčí
+        © {new Date().getFullYear()} <a href="https://ondrejkrejci.com" className="hover:underline">Ondřej Krejčí</a>
       </div>
     </footer>
   );
