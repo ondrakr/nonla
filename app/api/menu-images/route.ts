@@ -12,10 +12,10 @@ interface CloudinaryResource {
   [key: string]: any;
 }
 
-// Funkce pro získání lokálních obrázků z public/menu
+// Funkce pro získání lokálních obrázků z public/menu2
 async function getLocalMenuImages(): Promise<string[]> {
   try {
-    const menuDir = path.join(process.cwd(), 'public', 'menu');
+    const menuDir = path.join(process.cwd(), 'public', 'menu2');
     
     // Zkontrolujeme, zda složka existuje
     try {
@@ -32,16 +32,16 @@ async function getLocalMenuImages(): Promise<string[]> {
       return [];
     }
     
-    // Filtrujeme pouze menu obrázky (ne admin-menu)
+    // Filtrujeme pouze obrázky stran menu ve složce menu2 (očekáváme číselné názvy 1.png, 2.png, ...)
     const menuImages = files
-      .filter(file => /^menu\d+\.(jpg|jpeg|png|gif)$/i.test(file))
+      .filter(file => /^\d+\.(jpg|jpeg|png|gif)$/i.test(file))
       .sort((a, b) => {
         // Seřadíme podle čísla v názvu
         const aNum = parseInt(a.match(/\d+/)?.[0] || '0');
         const bNum = parseInt(b.match(/\d+/)?.[0] || '0');
         return aNum - bNum;
       })
-      .map(file => `/menu/${file}`);
+      .map(file => `/menu2/${file}`);
     
     return menuImages;
   } catch (error) {
@@ -138,6 +138,10 @@ export async function GET() {
       const menuMatch = fileName.match(/menu(\d+)/i);
       if (menuMatch) {
         return `menu${menuMatch[1]}`;
+      }
+      // Podpora pro číselně pojmenované soubory ve složce menu2 (např. 1.png -> menu1)
+      if (/^\d+$/.test(fileName)) {
+        return `menu${fileName}`;
       }
       
       // Pro admin-menu nebo jiné speciální případy vrátíme celý název
